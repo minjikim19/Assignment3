@@ -96,6 +96,37 @@
         who.forEach(d => { fertilityById[d.id] = +d[fieldColor]; });
         countries.features.forEach(d => { d.population = fertilityById[d.id] });
 
+        var Tooltip = svg.append("div")
+            .style("opacity", 0)
+            .attr("class", "tooltip")
+            .style("background-color", "white")
+            .style("border", "solid")
+            .style("border-width", "2px")
+            .style("border-radius", "5px")
+            .style("padding", "5px")
+            .style("position", "absolute")
+            .style("z-index", 100);
+
+        var mouseover = function(d) {
+            Tooltip.style("opacity", 1);
+            d3.select(this)
+                .style("stroke", "black")
+                .style("opacity", 1);
+            Tooltip
+                .html(d.id)
+                .style("left", (event.screenX) + "px")
+                .style("top", (event.screenY - 28) + "px");
+
+        }
+
+        var mouseleave = function(d) {
+            Tooltip
+                .style("opacity", 0);
+            d3.select(this)
+                .style("stroke", "none")
+                .style("opacity", 0.8);
+        }
+
         svg.append('g')
 				.attr('class', 'countries')
 				.selectAll('path')
@@ -107,17 +138,8 @@
 				.style('stroke', 'white')
 				.style('opacity', 0.8)
 				.style('stroke-width', 0.3)
-				.on('mouseover',function(d){
-                    const[x, y] = [d.screenX, d.screenY];
-                    // const name = Total fertility rate;
-                    console.log(data[2]);
-                    console.log(d.id);
-                    console.log(d.active);
-                    console.log(d.properties.name);
-                    console.log(fertilityById[d.id]);
-                    console.log(data[2].active);
-                })
-				.on('mouseout', function(d){})
+				.on('mouseover', mouseover)
+				.on('mouseout', mouseleave)
                 .on("click", function(d) {
                     var active = data[2].find(x => x.id === d.id).active ? false : true;
                     data[2].find(x => x.id === d.id).active = active;
@@ -195,16 +217,7 @@
             .attr("cx", xMap)
             .attr("cy", yMap)
             .style("fill", function(d) { return color(d[fieldColor]);})
-            .on("mouseover", function(d, i) {
-                const[x, y] = [d.screenX, d.screenY];
-                // const name = Total fertility rate;
-                console.log(d);
-                // console.log(d.active);
-                // console.log(d.Urban_population_growth);
-                // console.log(d.Urban_population_pct_of_total);
-                // console.log(fertilityById[d.id]);
-                // console.log(data[2].find(x => x.id === d.id).active);
-            })
+            .on("mouseover", mouseover)
             .on("click", function(d) {
                 var active = data[2].find(x => x.id === d.id).active ? false : true;
                 data[2].find(x => x.id === d.id).active = active;
@@ -228,7 +241,7 @@
                     d3.selectAll(".shape").style("fill", d => color(fertilityById[d.id]));
                 }
             })
-            .on("mouseout", function(d) {});
+            .on("mouseout", mouseleave);
 
         // draw legend
         var legend = scatterplot.append("g").attr("class", "legend-group").selectAll(".legend")
@@ -262,6 +275,8 @@
             .attr("dy", "1.5em")
             .style("text-anchor", "end")
             .text(fieldColor);
+
+
     });
 
 </script>
